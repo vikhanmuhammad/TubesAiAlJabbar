@@ -57,24 +57,9 @@ def mutasi(child1, child2):
             child2[i] = str(1 - int(child2[i]))
     return child1, child2
 
-# Fungsi pindah generasi (elitism agar gen terbaik tidak hilang) probabilitas 0,8
-def elitism(population, offspring):
-    allChromosomes = population + offspring
-    allFitness = [fitness(*decodeChromosome(chromosome)) for chromosome in allChromosomes]
-    pc = 0.8
-
-    if random.random() < pc:
-        idx = allFitness.index(max(allFitness))
-        bestChromosome = allChromosomes[idx]
-    else:
-        # Jika probabilitas elitisme tidak terpenuhi, maka hanya mengambil salah satu individu secara acak
-        bestChromosome = random.choice(allChromosomes)
-
-    return bestChromosome
 
 def main():
     fitnessPopulation = {}
-    previousBestChromosome = None  # Untuk menyimpan individu terbaik dari generasi sebelumnya
 
     print('-'*76)
     print('{} {:^10} {} {:^10} {} {:^10} {} {:^10} {} {:^20} {}'.format('|', 'Population', '|', 'Chromosome', '|', 'x1', '|', 'x2', '|', 'Fitness', '|'))
@@ -117,15 +102,6 @@ def main():
 
         fitnessPopulation = dict(sorted(fitnessPopulation.items(), key=lambda item: item[1], reverse=True))
 
-        # Menggunakan fungsi elitism untuk memutuskan apakah mempertahankan individu terbaik dari generasi sebelumnya
-        if previousBestChromosome is not None:
-            bestChromosome = elitism([previousBestChromosome], [highestPopulation[0]])
-            if bestChromosome == previousBestChromosome:
-                fitnessPopulation.popitem()
-                fitnessPopulation[previousBestChromosome] = fitness(*decodeChromosome(previousBestChromosome))
-
-        previousBestChromosome = highestPopulation[0]
-
         # Menambahkan data ke tabel
         print('{} {:^10} {} {:^10} {} {:^10} {} {:^10} {} {:^20} {}'.format('|', i+1, '|', highestPopulation[0], '|', decodeChromosome(parent1)[0], '|', decodeChromosome(parent2)[1], '|', fitnessPopulation[highestPopulation[0]], '|'))
         # Periksa apakah fitness terbaik dalam generasi saat ini lebih baik
@@ -136,7 +112,7 @@ def main():
             stagnationCount += 1  # Tidak ada peningkatan, tambahkan stagnationCount
 
         # Periksa apakah telah terjadi stagnasi
-        if stagnationCount >= stagnationLimit:
+        if stagnationCount == stagnationLimit:
             print("Evolusi tidak menghasilkan kemajuan. Menghentikan evolusi.")
             break
         i += 1
